@@ -15,7 +15,9 @@ class Remote {
         // Do something with response data
         if (response.data.success === false) {
           // console.log(response.data)
-          return Promise.reject(response.data.message || response.data.result || "something wrong")
+          return Promise.reject(
+            response.data.message || response.data.result || "something wrong"
+          )
         }
         return response
       },
@@ -116,6 +118,50 @@ class Remote {
     counter = counter.trim()
     const url = `order_book/asks/${base}/${counter}`
     return this.getRequest(url, params)
+  }
+
+  public getAccountTransactions(address: string, params: object = {}) {
+    address = address.trim()
+    if (!Wallet.isValidAddress(address)) {
+      return Promise.reject("invalid address provided")
+    }
+    const url = `/accounts/${address}/transactions`
+    return this.getRequest(url, params)
+  }
+  public getAccountTransaction(
+    address: string,
+    id_or_hash: number | string,
+    params: object = {}
+  ) {
+    address = address.trim()
+    if (!Wallet.isValidAddress(address)) {
+      return Promise.reject("invalid address provided")
+    }
+    let url = `/accounts/${address}/transactions`
+    url = `${url}/${id_or_hash}`
+    return this.getRequest(url, params)
+  }
+  public getTransaction(id_or_hash: number | string, params: object = {}) {
+    let url = `transactions`
+    url = `${url}/${id_or_hash}`
+    return this.getRequest(url, params)
+  }
+
+  public postAccountContractDeploy(address: string, params: object = {}) {
+    address = address.trim()
+    if (!Wallet.isValidAddress(address)) {
+      return Promise.reject("invalid address provided")
+    }
+    const url = `accounts/${address}/contract/deploy`
+    return this.postRequest(url, params)
+  }
+  public postAccountContractCall(address: string, params: object = {}) {
+    address = address.trim()
+    if (!Wallet.isValidAddress(address)) {
+      return Promise.reject("invalid address provided")
+    }
+    const url = `accounts/${address}/contract/call`
+    return this.postRequest(url, params)
   }
 }
 

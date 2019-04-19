@@ -4,6 +4,8 @@ const Remote = require("../").Remote
 const DATA = require("./config")
 const remote = new Remote({ server: DATA.server })
 
+let txid = 'should be updated during transactions query'
+
 describe("Remote", function() {
   describe("constructor", function() {
     it("instantiate a Remote successfully", function() {
@@ -164,6 +166,111 @@ describe("Remote", function() {
       expect(response.data).to.have.property("success")
       expect(response.data.success).to.be.true
       expect(response.data).to.have.property("bids")
+    })
+  })
+  describe("Transactions", function() {
+    it("get account transactions with incorrect address", async function() {
+      try {
+        await remote.getAccountTransactions(DATA.address.slice(1))
+      } catch (error) {
+        expect(error).to.equal("invalid address provided")
+      }
+    })
+    it("get account transactions with correct address", async function() {
+      let response = await remote.getAccountTransactions(DATA.address)
+      expect(response).to.have.property("data")
+      expect(response.data).to.have.property("success")
+      expect(response.data.success).to.be.true
+      expect(response.data).to.have.property("transactions")
+      expect(response.data.transactions[0]).to.be.an("object")
+      txid = response.data.transactions[0].hash
+    })
+    it("get account transaction with correct address", async function() {
+      let response = await remote.getAccountTransaction(DATA.address, txid)
+      expect(response).to.have.property("data")
+      expect(response.data).to.have.property("success")
+      expect(response.data.success).to.be.true
+      expect(response.data).to.have.property("transaction")
+      expect(response.data.transaction.hash).to.equal(txid)
+    })
+    it("get transaction", async function() {
+      let response = await remote.getTransaction(txid)
+      expect(response).to.have.property("data")
+      expect(response.data).to.have.property("success")
+      expect(response.data.success).to.be.true
+      expect(response.data).to.have.property("transaction")
+      expect(response.data.transaction.hash).to.equal(txid)
+    })
+  })
+  describe("accountContracts", function() {
+    this.timeout(10000)
+    it("post account contract deploy with incorrect address", async function() {
+      try {
+        await remote.postAccountContractDeploy(DATA.address.slice(1))
+      } catch (error) {
+        expect(error).to.equal("invalid address provided")
+      }
+    })
+    it("post account contract deploy with correct address but no secret", async function() {
+      try {
+        let response = await remote.postAccountContractDeploy(DATA.address, {})
+      } catch (error) {
+        expect(error).to.equal("Missing parameters")
+      }
+    })
+    xit("post account contract deploy with correct address and secret", async function() {
+      try {
+        let params = {
+          secret: DATA.secret,
+        }
+        let response = await remote.postAccountContractDeploy(
+          DATA.address,
+          params,
+          "POST"
+        )
+        expect(response).to.have.property("data")
+        expect(response.data).to.have.property("success")
+        expect(response.data.success).to.be.true
+        expect(response.data).to.have.property("result")
+        expect(response.data.result).to.equal("tesSUCCESS")
+      } catch (error) {
+        console.log(error)
+        expect(error).to.equal("should not throw")
+      }
+    })
+    it("post account contract call with incorrect address", async function() {
+      try {
+        await remote.postAccountContractCall(DATA.address.slice(1))
+      } catch (error) {
+        expect(error).to.equal("invalid address provided")
+      }
+    })
+    it("post account contract call with correct address but no secret", async function() {
+      try {
+        let response = await remote.postAccountContractCall(DATA.address, {})
+      } catch (error) {
+        expect(error).to.equal("Missing parameters")
+      }
+    })
+    xit("post account contract call with correct address and secret", async function() {
+      try {
+        let params = {
+          secret: DATA.secret,
+        }
+        let response = await remote.postAccountContractCall(
+          DATA.address,
+          params,
+          "POST"
+        )
+        expect(response).to.have.property("data")
+        expect(response.data).to.have.property("success")
+        expect(response.data.success).to.be.true
+        expect(response.data).to.have.property("result")
+        expect(response.data.result).to.equal("tesSUCCESS")
+      } catch (error) {
+        console.log(error)
+        expect(error).to.equal("should not throw")
+      }
     })
   })
 })
