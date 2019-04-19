@@ -1,0 +1,7 @@
+deploy
+lib-cov
+coverage.html
+.vscode
+tssrc
+test
+*.tgz
