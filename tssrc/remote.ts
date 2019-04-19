@@ -14,7 +14,8 @@ class Remote {
       (response) => {
         // Do something with response data
         if (response.data.success === false) {
-          return Promise.reject(response.data.message || "something wrong")
+          // console.log(response.data)
+          return Promise.reject(response.data.message || response.data.result || "something wrong")
         }
         return response
       },
@@ -35,7 +36,11 @@ class Remote {
   public postRequest(url: string, params: object = {}) {
     return this._axios.post(url, params)
   }
-  public accountBalances(address: string, params: object = {}) {
+  public deleteRequest(url: string, params: object = {}) {
+    return this._axios.delete(url, params)
+  }
+
+  public getAccountBalances(address: string, params: object = {}) {
     address = address.trim()
     if (!Wallet.isValidAddress(address)) {
       return Promise.reject("invalid address provided")
@@ -43,16 +48,74 @@ class Remote {
     const url = `accounts/${address}/balances`
     return this.getRequest(url, params)
   }
-  public accountPayments(address: string, params: object = {}, method = "GET") {
+
+  public getAccountPayments(address: string, params: object = {}) {
     address = address.trim()
     if (!Wallet.isValidAddress(address)) {
       return Promise.reject("invalid address provided")
     }
     const url = `accounts/${address}/payments`
-    if (method === "GET") {
-      return this.getRequest(url, params)
+    return this.getRequest(url, params)
+  }
+  public postAccountPayments(address: string, params: object = {}) {
+    address = address.trim()
+    if (!Wallet.isValidAddress(address)) {
+      return Promise.reject("invalid address provided")
     }
+    const url = `accounts/${address}/payments`
     return this.postRequest(url, params)
+  }
+  public deleteAccountPayments(address: string, params: object = {}) {
+    address = address.trim()
+    if (!Wallet.isValidAddress(address)) {
+      return Promise.reject("invalid address provided")
+    }
+    const url = `accounts/${address}/payments`
+    return this.deleteRequest(url, params)
+  }
+
+  public getAccountOrders(address: string, params: object = {}) {
+    address = address.trim()
+    if (!Wallet.isValidAddress(address)) {
+      return Promise.reject("invalid address provided")
+    }
+    const url = `accounts/${address}/orders`
+    return this.getRequest(url, params)
+  }
+  public postAccountOrders(address: string, params: object = {}) {
+    address = address.trim()
+    if (!Wallet.isValidAddress(address)) {
+      return Promise.reject("invalid address provided")
+    }
+    const url = `accounts/${address}/orders`
+    return this.postRequest(url, params)
+  }
+  public deleteAccountOrders(address: string, params: object = {}) {
+    address = address.trim()
+    if (!Wallet.isValidAddress(address)) {
+      return Promise.reject("invalid address provided")
+    }
+    const url = `accounts/${address}/orders`
+    return this.deleteRequest(url, params)
+  }
+
+  public getOrderBooks(base: string, counter: string, params: object = {}) {
+    base = base.trim()
+    counter = counter.trim()
+    const url = `order_book/${base}/${counter}`
+    return this.getRequest(url, params)
+  }
+  public getOrderBooksBids(base: string, counter: string, params: object = {}) {
+    base = base.trim()
+    counter = counter.trim()
+    const url = `order_book/bids/${base}/${counter}`
+    return this.getRequest(url, params)
+  }
+  public getOrderBooksAsks(base: string, counter: string, params: object = {}) {
+    base = base.trim()
+    counter = counter.trim()
+    const url = `order_book/asks/${base}/${counter}`
+    return this.getRequest(url, params)
   }
 }
 

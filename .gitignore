@@ -71,3 +71,4 @@ typings/
 distrib
 .vscode
 src
+**/*local.js
