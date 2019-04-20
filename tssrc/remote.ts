@@ -31,20 +31,42 @@ class Remote {
     return { server: this._server, _token: this._token }
   }
   public getRequest(url: string, params: object = {}) {
-    return params
-      ? this._axios.get(url, qs.stringify(params))
-      : this._axios.get(url)
+    // return params
+    //   ? this._axios.get(url, qs.stringify(params))
+    //   : this._axios.get(url)
+    return new Promise((resolve, reject) => {
+      params
+        ? this._axios
+            .get(url, qs.stringify(params))
+            .then((response) => resolve(response.data))
+            .catch((error) => reject(error))
+        : this._axios
+            .get(url)
+            .then((response) => resolve(response.data))
+            .catch((error) => reject(error))
+    })
   }
-  public postRequest(url: string, params: object = {}) {
-    return this._axios.post(url, params)
+  public postRequest(url: string, params: object = {}, safe = false) {
+    if (!safe) {
+      return Promise.reject("unsafe operation disabled")
+    }
+    return new Promise((resolve, reject) => {
+      this._axios
+        .post(url, params)
+        .then((response) => resolve(response.data))
+        .catch((error) => reject(error))
+    })
   }
-  public deleteRequest(url: string, params: object = {}) {
+  public deleteRequest(url: string, params: object = {}, safe = false) {
+    if (!safe) {
+      return Promise.reject("unsafe operation disabled")
+    }
     return this._axios.delete(url, params)
   }
 
   public postBlob(params: object = {}) {
     const url = `blob`
-    return this.postRequest(url, params)
+    return this.postRequest(url, params, true)
   }
 
   public getLedger(param: string | number | undefined, params: object = {}) {
