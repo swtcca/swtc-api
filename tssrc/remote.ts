@@ -31,19 +31,15 @@ class Remote {
     return { server: this._server, _token: this._token }
   }
   public getRequest(url: string, params: object = {}) {
-    // return params
-    //   ? this._axios.get(url, qs.stringify(params))
-    //   : this._axios.get(url)
     return new Promise((resolve, reject) => {
       params
         ? this._axios
             .get(
               `${url}?${qs.stringify(params, {
-                encode: false,
-                allowDots: true
+                allowDots: true,
+                encode: false
               })}`
             )
-            // .get(`${url}?${qs.stringify(params)}`)
             .then((response) => resolve(response.data))
             .catch((error) => reject(error))
         : this._axios
