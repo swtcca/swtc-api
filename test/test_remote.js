@@ -15,6 +15,24 @@ describe("Remote", function() {
       expect(remote._token).to.be.equal("SWT")
     })
   })
+  describe("local sign", function() {
+    this.timeout(10000)
+    it("post invalid blob", async function() {
+      try {
+        await remote.postBlob({blob: '0123456789'})
+        expect(10).to.equal(100)
+      } catch (error) {
+        expect(error).to.equal("Transaction length invalid")
+      }
+    })
+    xit("post correct blob", async function() {
+      try {
+        let response = await remote.postBlob({blob: ''})
+      } catch (error) {
+        expect(error).to.equal("Missing parameters")
+      }
+    })
+  })
   describe("getLedger", function() {
     this.timeout(10000)
     it("get latest ledger without parameter", async function() {
@@ -45,6 +63,7 @@ describe("Remote", function() {
     })
   })
   describe("accountBalances", function() {
+    this.timeout(10000)
     it("get account balances with incorrect address", async function() {
       try {
         await remote.getAccountBalances(DATA.address.slice(1))
@@ -201,6 +220,7 @@ describe("Remote", function() {
     })
   })
   describe("Transactions", function() {
+    this.timeout(10000)
     it("get account transactions with incorrect address", async function() {
       try {
         await remote.getAccountTransactions(DATA.address.slice(1))

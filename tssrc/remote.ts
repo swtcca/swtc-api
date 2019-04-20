@@ -42,6 +42,11 @@ class Remote {
     return this._axios.delete(url, params)
   }
 
+  public postBlob(params: object = {}) {
+    const url = `blob`
+    return this.postRequest(url, params)
+  }
+
   public getLedger(param: string | number | undefined, params: object = {}) {
     let url = `ledger`
     if (typeof param === "number") {
