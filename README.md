@@ -15,45 +15,54 @@
 ## usages
 
 ### import
+
 ```javascript
 const API = require("swtc-api")
 const Remote = API.Remote
 // or
 import { Remote } from "swtc-api"
 ```
+
 ### code
+
 ```typescript
-async function main () {
-    try {
-        let result: any = await remote.getAccountBalances(DATA.address)
-        console.log(result)
-        result = await remote.getAccountPayments(DATA.address)
-        console.log(result)
-        result = await remote.getAccountOrders(DATA.address)
-        console.log(result)
-        result = await remote.getAccountTransactions(DATA.address)
-        console.log(result)
-        result = await remote.getLedger()
-        const ledger_index = result.ledger_index
-        const ledger_hash = result.ledger_hash
-        console.log(result)
-        result = await remote.getLedger(ledger_index)
-        result = await remote.getLedger(parseInt(ledger_index))
-        result = await remote.getLedger(ledger_hash)
-        result = await remote.getOrderBooks('SWT',`CNY+${DATA.issuer}`)
-        result = await remote.getOrderBooksBids('SWT',`CNY+${DATA.issuer}`)
-        result = await remote.getOrderBooksAsks('SWT',`CNY+${DATA.issuer}`)
-        console.log(result)
-        result = await remote.postBlob({blob: '120000220000000024000002326140000000000186A0684000000000002710732102197F1426BCA2F59B6B910F0391E55888B4FE80AF962478493104A33274B1B03A74473045022100F0175B4AFF5B1E348FC46A8C0021FF22B16CF87113C0B6E042174374416B071102203CB8A47A82576B69DB50051DF943C87872BB8F065A2D12B01ACA03890FAC8E548114AF09183A11AA70DA06E115E03B0E5478232740B58314DA976A4DE4827163F062B09050832D8D78025D5A'})
-        console.log(result)
-    } catch (error) {
-        console.log(error)
-    }
+async function main() {
+  try {
+    let result: any = await remote.getAccountBalances(DATA.address)
+    console.log(result)
+    result = await remote.getAccountPayments(DATA.address)
+    console.log(result)
+    result = await remote.getAccountOrders(DATA.address)
+    console.log(result)
+    result = await remote.getAccountTransactions(DATA.address)
+    console.log(result)
+    result = await remote.getLedger()
+    const ledger_index = result.ledger_index
+    const ledger_hash = result.ledger_hash
+    console.log(result)
+    result = await remote.getLedger(ledger_index)
+    result = await remote.getLedger(parseInt(ledger_index))
+    result = await remote.getLedger(ledger_hash)
+    result = await remote.getOrderBooks("SWT", `CNY+${DATA.issuer}`)
+    result = await remote.getOrderBooksBids("SWT", `CNY+${DATA.issuer}`)
+    result = await remote.getOrderBooksAsks("SWT", `CNY+${DATA.issuer}`)
+    console.log(result)
+    result = await remote.postBlob({
+      blob:
+        "120000220000000024000002326140000000000186A0684000000000002710732102197F1426BCA2F59B6B910F0391E55888B4FE80AF962478493104A33274B1B03A74473045022100F0175B4AFF5B1E348FC46A8C0021FF22B16CF87113C0B6E042174374416B071102203CB8A47A82576B69DB50051DF943C87872BB8F065A2D12B01ACA03890FAC8E548114AF09183A11AA70DA06E115E03B0E5478232740B58314DA976A4DE4827163F062B09050832D8D78025D5A"
+    })
+    console.log(result)
+  } catch (error) {
+    console.log(error)
+  }
 }
 main()
 ```
+
 ### output
-```json
+
+```javascript
+> main()
 { success: true,
   status_code: '0',
   balances:
