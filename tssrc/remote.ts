@@ -42,6 +42,22 @@ class Remote {
     return this._axios.delete(url, params)
   }
 
+  public getLedger(param: string | number | undefined, params: object = {}) {
+    let url = `ledger`
+    if (typeof param === "number") {
+      url = `${url}/index/${param}`
+    } else if (typeof param === "string") {
+      if (/^[0-9]{1,20}$/.test(param)) {
+        url = `${url}/index/${param}`
+      } else {
+        url = `${url}/hash/${param}`
+      }
+    } else {
+      url = `${url}/index`
+    }
+    return this.getRequest(url, params)
+  }
+
   public getAccountBalances(address: string, params: object = {}) {
     address = address.trim()
     if (!Wallet.isValidAddress(address)) {

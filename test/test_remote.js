@@ -5,12 +5,43 @@ const DATA = require("./config")
 const remote = new Remote({ server: DATA.server })
 
 let txid = 'should be updated during transactions query'
+let ledger_index = 100
+let ledger_hash = 'should be updated during ledger query'
 
 describe("Remote", function() {
   describe("constructor", function() {
     it("instantiate a Remote successfully", function() {
       let remote = new Remote({})
       expect(remote._token).to.be.equal("SWT")
+    })
+  })
+  describe("getLedger", function() {
+    this.timeout(10000)
+    it("get latest ledger without parameter", async function() {
+      let response = await remote.getLedger()
+      expect(response).to.have.property("data")
+      expect(response.data).to.have.property("success")
+      expect(response.data.success).to.be.true
+      expect(response.data).to.have.property("ledger_hash")
+      expect(response.data).to.have.property("ledger_index")
+      ledger_hash = response.data.ledger_hash
+      ledger_index = response.data.ledger_index
+    })
+    it("get ledger with hash", async function() {
+      let response = await remote.getLedger(ledger_hash)
+      expect(response).to.have.property("data")
+      expect(response.data).to.have.property("success")
+      expect(response.data.success).to.be.true
+      expect(response.data).to.have.property("ledger_hash")
+      expect(response.data.ledger_hash).to.equal(ledger_hash)
+    })
+    it("get ledger with index", async function() {
+      let response = await remote.getLedger(ledger_index)
+      expect(response).to.have.property("data")
+      expect(response.data).to.have.property("success")
+      expect(response.data.success).to.be.true
+      expect(response.data).to.have.property("ledger_index")
+      expect(parseInt(response.data.ledger_index)).to.equal(ledger_index)
     })
   })
   describe("accountBalances", function() {
@@ -138,6 +169,7 @@ describe("Remote", function() {
     })
   })
   describe("orderBooks", function() {
+    this.timeout(10000)
     it("get orderbooks with incorrect pairs", async function() {
       try {
         await remote.getOrderBooks('SWT', `CNT+${DATA.issuer}`)
