@@ -69,12 +69,11 @@ class Remote {
     return this.postRequest(url, params, true)
   }
 
-  public getLedger(
-    param: string | number | null | undefined,
-    params: object = {}
-  ) {
+  public getLedger(param: string | number = "") {
     let url = `ledger`
-    if (typeof param === "number") {
+    if (!param) {
+      url = `${url}/index`
+    } else if (typeof param === "number") {
       url = `${url}/index/${param}`
     } else if (typeof param === "string") {
       if (/^[0-9]{1,20}$/.test(param)) {
@@ -85,7 +84,7 @@ class Remote {
     } else {
       url = `${url}/index`
     }
-    return this.getRequest(url, params)
+    return this.getRequest(url)
   }
 
   public getAccountBalances(address: string, params: object = {}) {
