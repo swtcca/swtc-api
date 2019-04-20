@@ -10,8 +10,6 @@
 4. promise based **axios** operation
 5. **typescript** friend
 
-- additional parameters like marker not tested yet
-
 ## usages
 
 ### import
@@ -28,13 +26,21 @@ import { Remote } from "swtc-api"
 ```typescript
 async function main() {
   try {
-    let result: any = await remote.getAccountBalances(DATA.address)
+    let result: any = await remote.getAccountBalances(DATA.address, {
+      currency: "CNY"
+    })
     console.log(result)
-    result = await remote.getAccountPayments(DATA.address)
+    result = await remote.getAccountPayments(DATA.address, {
+      results_per_page: 4
+    })
     console.log(result)
-    result = await remote.getAccountOrders(DATA.address)
+    result = await remote.getAccountOrders(DATA.address, {
+      results_per_page: 10
+    })
     console.log(result)
-    result = await remote.getAccountTransactions(DATA.address)
+    result = await remote.getAccountTransactions(DATA.address, {
+      results_per_page: 4
+    })
     console.log(result)
     result = await remote.getLedger()
     const ledger_index = result.ledger_index
@@ -43,9 +49,15 @@ async function main() {
     result = await remote.getLedger(ledger_index)
     result = await remote.getLedger(parseInt(ledger_index))
     result = await remote.getLedger(ledger_hash)
-    result = await remote.getOrderBooks("SWT", `CNY+${DATA.issuer}`)
-    result = await remote.getOrderBooksBids("SWT", `CNY+${DATA.issuer}`)
-    result = await remote.getOrderBooksAsks("SWT", `CNY+${DATA.issuer}`)
+    result = await remote.getOrderBooks("SWT", `CNY+${DATA.issuer}`, {
+      results_per_page: 4
+    })
+    result = await remote.getOrderBooksBids("SWT", `CNY+${DATA.issuer}`, {
+      results_per_page: 4
+    })
+    result = await remote.getOrderBooksAsks("SWT", `CNY+${DATA.issuer}`, {
+      results_per_page: 4
+    })
     console.log(result)
     result = await remote.postBlob({
       blob:
@@ -66,47 +78,14 @@ main()
 { success: true,
   status_code: '0',
   balances:
-   [ { value: '85.008279', currency: 'SWT', issuer: '', freezed: '79' },
-     { value: '0.99335',
+   [ { value: '0.99335',
        currency: 'CNY',
-       issuer: 'jGa9J9TkqtBcUoHe2zqhVFFbgUVED6o9or',
-       freezed: '0.000000' },
-     { value: '0',
-       currency: 'VCC',
-       issuer: 'jGa9J9TkqtBcUoHe2zqhVFFbgUVED6o9or',
-       freezed: '1.000000' },
-     { value: '0',
-       currency: 'SPC',
-       issuer: 'jGa9J9TkqtBcUoHe2zqhVFFbgUVED6o9or',
-       freezed: '1.000000' },
-     { value: '10',
-       currency: '800000000000000000000000416FE9044CDAA1A2',
-       issuer: 'jGa9J9TkqtBcUoHe2zqhVFFbgUVED6o9or',
-       freezed: '0.000000' },
-     { value: '0',
-       currency: 'JJCC',
-       issuer: 'jGa9J9TkqtBcUoHe2zqhVFFbgUVED6o9or',
-       freezed: '0.000000' },
-     { value: '0',
-       currency: 'JEKT',
-       issuer: 'jGa9J9TkqtBcUoHe2zqhVFFbgUVED6o9or',
-       freezed: '0.000000' },
-     { value: '0',
-       currency: 'JCALL',
-       issuer: 'jGa9J9TkqtBcUoHe2zqhVFFbgUVED6o9or',
-       freezed: '0.000000' },
-     { value: '300',
-       currency: 'HJT',
-       issuer: 'jGa9J9TkqtBcUoHe2zqhVFFbgUVED6o9or',
-       freezed: '0.000000' },
-     { value: '1088',
-       currency: 'JSLASH',
        issuer: 'jGa9J9TkqtBcUoHe2zqhVFFbgUVED6o9or',
        freezed: '0.000000' } ],
   sequence: 563 }
 { success: true,
   status_code: '0',
-  marker: { ledger: 12578882, seq: 3 },
+  marker: { ledger: 12592850, seq: 2 },
   payments:
    [ { date: 1555784710,
        hash:
@@ -147,36 +126,6 @@ main()
        memos: [],
        counterparty: 'jLvo6LSKNEYJ4KDwDuM8LU5fuSsQkE4HVW',
        amount: [Object],
-       effects: [] },
-     { date: 1555773090,
-       hash:
-        '13C0A18AF8C99B0A6AE4D257A79A3A6C99611970F71487EC5582EB0A9B332E3F',
-       type: 'sent',
-       fee: '0.01',
-       result: 'tesSUCCESS',
-       memos: [],
-       counterparty: 'jLvo6LSKNEYJ4KDwDuM8LU5fuSsQkE4HVW',
-       amount: [Object],
-       effects: [] },
-     { date: 1555772660,
-       hash:
-        'DA3604968AC2C245673B95ED58650CA0A17603BE27E141FE193414C0E4BBFCB7',
-       type: 'sent',
-       fee: '0.01',
-       result: 'tesSUCCESS',
-       memos: [],
-       counterparty: 'jLvo6LSKNEYJ4KDwDuM8LU5fuSsQkE4HVW',
-       amount: [Object],
-       effects: [] },
-     { date: 1555710400,
-       hash:
-        'D1400CDB7AD093985B84B84FEE4FD4D41C5CB2E3B82ED33FB806AAA31A5E40AC',
-       type: 'sent',
-       fee: '0.01',
-       result: 'tesSUCCESS',
-       memos: [Array],
-       counterparty: 'jLvo6LSKNEYJ4KDwDuM8LU5fuSsQkE4HVW',
-       amount: [Object],
        effects: [] } ] }
 { success: true,
   status_code: '0',
@@ -188,7 +137,7 @@ main()
        sequence: 554 } ] }
 { success: true,
   status_code: '0',
-  marker: { ledger: 12578882, seq: 3 },
+  marker: { ledger: 12592850, seq: 2 },
   transactions:
    [ { date: 1555784710,
        hash:
@@ -229,141 +178,40 @@ main()
        memos: [],
        counterparty: 'jLvo6LSKNEYJ4KDwDuM8LU5fuSsQkE4HVW',
        amount: [Object],
-       effects: [] },
-     { date: 1555773090,
-       hash:
-        '13C0A18AF8C99B0A6AE4D257A79A3A6C99611970F71487EC5582EB0A9B332E3F',
-       type: 'sent',
-       fee: '0.01',
-       result: 'tesSUCCESS',
-       memos: [],
-       counterparty: 'jLvo6LSKNEYJ4KDwDuM8LU5fuSsQkE4HVW',
-       amount: [Object],
-       effects: [] },
-     { date: 1555772660,
-       hash:
-        'DA3604968AC2C245673B95ED58650CA0A17603BE27E141FE193414C0E4BBFCB7',
-       type: 'sent',
-       fee: '0.01',
-       result: 'tesSUCCESS',
-       memos: [],
-       counterparty: 'jLvo6LSKNEYJ4KDwDuM8LU5fuSsQkE4HVW',
-       amount: [Object],
-       effects: [] },
-     { date: 1555742630,
-       hash:
-        'E7C54515890BCF90C439E948622B7830AAF01D1BF67F555FA00DE0A17CFCA9F4',
-       type: 'offercancel',
-       fee: '0.01',
-       result: 'tesSUCCESS',
-       memos: [],
-       offerseq: 556,
-       effects: [Array] },
-     { date: 1555742310,
-       hash:
-        '227A80998704955AE23DC062EA98C0A586292359605E72983275A5605F2CE627',
-       type: 'offernew',
-       fee: '0.01',
-       result: 'tesSUCCESS',
-       memos: [],
-       offertype: 'sell',
-       seq: 555,
-       effects: [Array],
-       pair: 'SWT/CNY:jGa9J9TkqtBcUoHe2zqhVFFbgUVED6o9or',
-       amount: '1',
-       price: '0.01' },
-     { date: 1555710400,
-       hash:
-        'F430476E86EE4E325EB5C604A9E295D3E34D0D012E0B20A9715535906FBC8DE1',
-       type: 'offernew',
-       fee: '0.01',
-       result: 'tesSUCCESS',
-       memos: [],
-       offertype: 'sell',
-       seq: 554,
-       effects: [Array],
-       pair: 'SWT/CNY:jGa9J9TkqtBcUoHe2zqhVFFbgUVED6o9or',
-       amount: '1',
-       price: '0.007' },
-     { date: 1555710400,
-       hash:
-        'D1400CDB7AD093985B84B84FEE4FD4D41C5CB2E3B82ED33FB806AAA31A5E40AC',
-       type: 'sent',
-       fee: '0.01',
-       result: 'tesSUCCESS',
-       memos: [Array],
-       counterparty: 'jLvo6LSKNEYJ4KDwDuM8LU5fuSsQkE4HVW',
-       amount: [Object],
        effects: [] } ] }
 { success: true,
   status_code: '0',
   ledger_hash:
-   '19C33520D7B747D4ADD8CF93284DAD8D93B41A33DC773D499D3E413AEFDAAAD5',
-  ledger_index: 12594839 }
+   'FC5C73CD21CC8BC39E261076675A1C52EE44F42FAAE1783F4BC2ACB1AE7E1812',
+  ledger_index: 12595267 }
 { success: true,
   status_code: '0',
   pair: 'SWT/CNY+jGa9J9TkqtBcUoHe2zqhVFFbgUVED6o9or',
   asks:
-   [ { price: 0.00659,
+   [ { price: 0.00658,
+       order_maker: 'jMZQiH1s9fnmuMu79q5w5oD7GqzMJobA8o',
+       sequence: 4789,
+       passive: false,
+       sell: true,
+       funded: 199684 },
+     { price: 0.00658,
+       order_maker: 'jUFJKyFS8xW3sWD5dbp8WKy1N3B6PeQ9VB',
+       sequence: 130,
+       passive: false,
+       sell: true,
+       funded: 257984 },
+     { price: 0.00659,
        order_maker: 'jn88gyE9wRrsXTszA8KhfmiwZgU22yZENN',
        sequence: 6181,
        passive: false,
        sell: true,
-       funded: 961503.22 },
-     { price: 0.0066,
-       order_maker: 'j3Jwpaj1XXvgK1oVowWuFEawUcCfesCx8N',
-       sequence: 1980,
+       funded: 726897.52 },
+     { price: 0.00659,
+       order_maker: 'jnXnJzg6dDEUogbTP52hkgxgeeUGdVHa2i',
+       sequence: 152,
        passive: false,
        sell: true,
-       funded: 1762250.690001 },
-     { price: 0.00661,
-       order_maker: 'j34XSCAMEXqGa1wN3k6ubPXfgp9MWmgnjR',
-       sequence: 9009,
-       passive: false,
-       sell: true,
-       funded: 202193 },
-     { price: 0.00661,
-       order_maker: 'jwD5SNcnGbrmWcoLoonfgNVFPuuFn9iRbo',
-       sequence: 46834,
-       passive: false,
-       sell: true,
-       funded: 3758000 },
-     { price: 0.00662,
-       order_maker: 'jE6rzt1ykhwZeQAEHPtjenKvrrWtZDXzc4',
-       sequence: 3640,
-       passive: false,
-       sell: true,
-       funded: 998190.56 },
-     { price: 0.00662,
-       order_maker: 'js4ckWFYPTXs5LxwC9vGumvDamemc1xezE',
-       sequence: 462,
-       passive: false,
-       sell: true,
-       funded: 279861 },
-     { price: 0.00663,
-       order_maker: 'jMYbCHqzXLpRoJjaiVNExe6yX63mCodmR4',
-       sequence: 20975,
-       passive: false,
-       sell: true,
-       funded: 716187.37 },
-     { price: 0.00663,
-       order_maker: 'jGrGArKXqcAhSdfmphwEpWhpRFsS4UGEd8',
-       sequence: 1164,
-       passive: false,
-       sell: true,
-       funded: 1241757 },
-     { price: 0.00664,
-       order_maker: 'jGH263GYdDsuP18zKU2Wuj3yy9gGZzdGQW',
-       sequence: 715,
-       passive: false,
-       sell: true,
-       funded: 1349789.47 },
-     { price: 0.00664,
-       order_maker: 'jPizZJYDqneS3NVKUhftS79p3YbqhC87UQ',
-       sequence: 2,
-       passive: false,
-       sell: true,
-       funded: 400 } ] }
+       funded: 152208 } ] }
 { success: true,
   status_code: '0',
   engine_result: 'tefPAST_SEQ',

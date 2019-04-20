@@ -37,7 +37,13 @@ class Remote {
     return new Promise((resolve, reject) => {
       params
         ? this._axios
-            .get(url, qs.stringify(params))
+            .get(
+              `${url}?${qs.stringify(params, {
+                encode: false,
+                allowDots: true
+              })}`
+            )
+            // .get(`${url}?${qs.stringify(params)}`)
             .then((response) => resolve(response.data))
             .catch((error) => reject(error))
         : this._axios
