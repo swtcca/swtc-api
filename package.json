@@ -1,6 +1,6 @@
 {
   "name": "swtc-api",
-  "version": "0.1.0",
+  "version": "0.2.1",
   "description": "swtc lib api",
   "main": "src/index.js",
   "directories": {
@@ -39,7 +39,7 @@
   "dependencies": {
     "axios": "^0.18.0",
     "qs": "^6.7.0",
-    "swtc-transaction": "^1.0.1"
+    "swtc-factory": "^1.1.13"
   },
   "devDependencies": {
     "@types/node": "^11.12.2",
