@@ -69,7 +69,10 @@ class Remote {
     return this.postRequest(url, params, true)
   }
 
-  public getLedger(param: string | number | undefined, params: object = {}) {
+  public getLedger(
+    param: string | number | null | undefined,
+    params: object = {}
+  ) {
     let url = `ledger`
     if (typeof param === "number") {
       url = `${url}/index/${param}`
