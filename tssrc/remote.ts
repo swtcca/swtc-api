@@ -1,6 +1,7 @@
 import axios from "axios"
 import qs from "qs"
 import { Wallet } from "swtc-factory"
+import { Transaction } from "swtc-transaction"
 
 class Remote {
   public _server: string
@@ -27,9 +28,13 @@ class Remote {
       }
     )
   }
+
+  // show instacnce basic configuration
   public display() {
-    return { server: this._server, _token: this._token }
+    return { server: this._server, token: this._token }
   }
+
+  // wrap axios promise to resolve only interested response data instead
   public getRequest(url: string, params: object = {}) {
     return new Promise((resolve, reject) => {
       params
@@ -48,24 +53,34 @@ class Remote {
             .catch((error) => reject(error))
     })
   }
-  public postRequest(url: string, params: object = {}, safe = false) {
+
+  // guard unsafe operation and wrap axios promise to resolve only interested response data instead
+  public postRequest(url: string, data: object = {}, safe = false) {
     if (!safe) {
       return Promise.reject("unsafe operation disabled")
     }
     return new Promise((resolve, reject) => {
       this._axios
-        .post(url, params)
+        .post(url, data)
         .then((response) => resolve(response.data))
         .catch((error) => reject(error))
     })
   }
-  public deleteRequest(url: string, params: object = {}, safe = false) {
+
+  // guard unsafe operation and wrap axios promise to resolve only interested response data instead
+  public deleteRequest(url: string, data: object = {}, safe = false) {
     if (!safe) {
       return Promise.reject("unsafe operation disabled")
     }
-    return this._axios.delete(url, params)
+    return new Promise((resolve, reject) => {
+      this._axios
+        .delete(url, data)
+        .then((response) => resolve(response.data))
+        .catch((error) => reject(error))
+    })
   }
 
+  // submit locally signed transactions, this is the only permitted post and delete operation
   public postBlob(params: object = {}) {
     const url = `blob`
     return this.postRequest(url, params, true)
@@ -114,13 +129,13 @@ class Remote {
     const url = `accounts/${address}/payments`
     return this.postRequest(url, params)
   }
-  public deleteAccountPayments(address: string, params: object = {}) {
+  public deleteAccountPayments(address: string, data: object = {}) {
     address = address.trim()
     if (!Wallet.isValidAddress(address)) {
       return Promise.reject("invalid address provided")
     }
     const url = `accounts/${address}/payments`
-    return this.deleteRequest(url, params)
+    return this.deleteRequest(url, data)
   }
 
   public getAccountOrders(address: string, params: object = {}) {
@@ -131,21 +146,21 @@ class Remote {
     const url = `accounts/${address}/orders`
     return this.getRequest(url, params)
   }
-  public postAccountOrders(address: string, params: object = {}) {
+  public postAccountOrders(address: string, data: object = {}) {
     address = address.trim()
     if (!Wallet.isValidAddress(address)) {
       return Promise.reject("invalid address provided")
     }
     const url = `accounts/${address}/orders`
-    return this.postRequest(url, params)
+    return this.postRequest(url, data)
   }
-  public deleteAccountOrders(address: string, params: object = {}) {
+  public deleteAccountOrders(address: string, data: object = {}) {
     address = address.trim()
     if (!Wallet.isValidAddress(address)) {
       return Promise.reject("invalid address provided")
     }
     const url = `accounts/${address}/orders`
-    return this.deleteRequest(url, params)
+    return this.deleteRequest(url, data)
   }
 
   public getOrderBooks(base: string, counter: string, params: object = {}) {
@@ -175,40 +190,69 @@ class Remote {
     const url = `/accounts/${address}/transactions`
     return this.getRequest(url, params)
   }
-  public getAccountTransaction(
-    address: string,
-    id_or_hash: number | string,
-    params: object = {}
-  ) {
+  public getAccountTransaction(address: string, id_or_hash: number | string) {
     address = address.trim()
     if (!Wallet.isValidAddress(address)) {
       return Promise.reject("invalid address provided")
     }
     let url = `/accounts/${address}/transactions`
     url = `${url}/${id_or_hash}`
-    return this.getRequest(url, params)
+    return this.getRequest(url)
   }
-  public getTransaction(id_or_hash: number | string, params: object = {}) {
+  public getTransaction(id_or_hash: number | string) {
     let url = `transactions`
     url = `${url}/${id_or_hash}`
-    return this.getRequest(url, params)
+    return this.getRequest(url)
   }
 
-  public postAccountContractDeploy(address: string, params: object = {}) {
+  public postAccountContractDeploy(address: string, data: object = {}) {
     address = address.trim()
     if (!Wallet.isValidAddress(address)) {
       return Promise.reject("invalid address provided")
     }
     const url = `accounts/${address}/contract/deploy`
-    return this.postRequest(url, params)
+    return this.postRequest(url, data)
   }
-  public postAccountContractCall(address: string, params: object = {}) {
+  public postAccountContractCall(address: string, data: object = {}) {
     address = address.trim()
     if (!Wallet.isValidAddress(address)) {
       return Promise.reject("invalid address provided")
     }
     const url = `accounts/${address}/contract/call`
-    return this.postRequest(url, params)
+    return this.postRequest(url, data)
+  }
+
+  // here we extend beyond api calls to interfact with swtc-transactions
+  // we try to use the same as that has been in swtc-lib
+  public buildPaymentTx(options) {
+    return Transaction.buildPaymentTx(options, this)
+  }
+  public buildOfferCreateTx(options) {
+    return Transaction.buildOfferCreateTx(options, this)
+  }
+  public buildOfferCancelTx(options) {
+    return Transaction.buildOfferCancelTx(options, this)
+  }
+  public buildAccountSetTx(options) {
+    return Transaction.buildAccountSetTx(options, this)
+  }
+  public buildRelationTx(options) {
+    return Transaction.buildRelationTx(options, this)
+  }
+  public buildContractDeployTx(options) {
+    return Transaction.deployContractTx(options, this)
+  }
+  public deployContractTx(options) {
+    return Transaction.deployContractTx(options, this)
+  }
+  public buildContractCallTx(options) {
+    return Transaction.callContractTx(options, this)
+  }
+  public callContractTx(options) {
+    return Transaction.callContractTx(options, this)
+  }
+  public buildBrokerageTx(options) {
+    return Transaction.callContractTx(options, this)
   }
 }
 
