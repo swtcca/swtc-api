@@ -144,7 +144,6 @@ describe("Remote", function() {
       expect(data).to.have.property("success")
       expect(data.success).to.be.true
       expect(data).to.have.property("orders")
-      expect(data.orders[0]).to.be.an("object")
     })
     it("post account orders with correct address but no secret", async function() {
       try {
