@@ -21,6 +21,239 @@ const Remote = API.Remote
 import { Remote } from "swtc-api"
 ```
 
+### transaction operations
+
+```typescript
+import DATA from "./config"
+import { Remote } from "swtc-api"
+const remote = new Remote({ server: DATA.server })
+const sleep = (time) => new Promise((res) => setTimeout(() => res(), time))
+
+async function main() {
+  let tx: any, result: any, sequence: number
+  try {
+    console.log(
+      `// secure transactions working with swtc-api and swtc-transaction`
+    )
+    result = await remote.getAccountBalances(DATA.address, { currency: "SWT" })
+    sequence = result.sequence
+    console.log(result.balances)
+    console.log(`// demo payment transactions`)
+    tx = remote.buildPaymentTx({
+      source: DATA.address,
+      to: DATA.address2,
+      amount: { value: 0.1, currency: "SWT", issuer: "" }
+    })
+    tx.setSequence(sequence)
+    tx.setSecret(DATA.secret)
+    tx.sign((error, blob) => {
+      if (error) {
+        throw error
+      } else {
+        console.log(`signed blob: ${blob}`)
+        remote
+          .postBlob({ blob })
+          .then(console.log)
+          .catch(console.log)
+      }
+    })
+    await sleep(20000)
+    result = await remote.getAccountBalances(DATA.address, { currency: "SWT" })
+    console.log(result.balances)
+    console.log(`\n// demo offer create transactions`)
+    console.log(await remote.getAccountOrders(DATA.address))
+    tx = remote.buildOfferCreateTx({
+      type: "Sell",
+      account: DATA.address,
+      taker_gets: { value: 1, currency: "SWT", issuer: "" },
+      taker_pays: { value: 0.6, currency: "CNY", issuer: DATA.issuer }
+    })
+    tx.setSecret(DATA.secret)
+    tx.sign((error, blob) => {
+      if (error) {
+        throw error
+      } else {
+        console.log(`signed blob: ${blob}`)
+        tx.submitApi()
+          .then(console.log)
+          .catch(console.log)
+      }
+    })
+    await sleep(20000)
+    result = await remote.getAccountOrders(DATA.address)
+    let order: any = result.orders.sort((x, y) => y.sequence - x.sequence)[0]
+    console.log(order)
+    console.log(result.orders)
+    console.log(`\n// demo offer cancel transactions`)
+    tx = remote.buildOfferCancelTx({
+      account: DATA.address,
+      sequence: order.sequence
+    })
+    tx.setSecret(DATA.secret)
+    tx.sign((error, blob) => {
+      if (error) {
+        throw error
+      } else {
+        console.log(`signed blob: ${blob}`)
+        tx.submitApi()
+          .then(console.log)
+          .catch(console.log)
+      }
+    })
+    await sleep(20000)
+    result = await remote.getAccountOrders(DATA.address)
+    console.log(result.orders)
+    console.log(`\n// demo relation transactions`)
+    console.log(
+      await remote.getAccountBalances(DATA.address, { currency: "CNY" })
+    )
+    tx = remote.buildRelationTx({
+      type: "freeze", // or authorize
+      target: DATA.address2,
+      account: DATA.address,
+      limit: {
+        value: Math.floor(Math.random() * 10),
+        currency: "CNY",
+        issuer: DATA.issuer
+      }
+    })
+    // tx.setSequence(sequence)
+    tx.setSecret(DATA.secret)
+    tx.sign((error, blob) => {
+      if (error) {
+        throw error
+      } else {
+        console.log(`signed blob: ${blob}`)
+        // remote.postBlob({blob}).then(console.log).catch(console.log)
+        // tx.submitApi().then(console.log).catch(console.log)
+      }
+    })
+    await sleep(20000)
+    console.log(
+      await remote.getAccountBalances(DATA.address, { currency: "CNY" })
+    )
+  } catch (error) {
+    console.log(error)
+  }
+}
+main()
+```
+
+- output
+
+```javascript
+> ts-node src/index.ts
+
+// secure transactions working with swtc-api and swtc-transaction
+[ { value: '11040.16', currency: 'SWT', issuer: '', freezed: '15' } ]
+// demo payment transactions
+{ success: true,
+  status_code: '0',
+  engine_result: 'tesSUCCESS',
+  engine_result_code: 0,
+  engine_result_message:
+   'The transaction was applied. Only final in a validated ledger.',
+  tx_blob:
+   '120000220000000024000000556140000000000186A06840000000000027107321029110C3744FB57BD1F4824F5B989AE75EB6402B4365B501F6EDCA9BE44A675E1574473045022100A683042FFA7C9436DC523491709AEB64B1A28A721FA50A1F9E5BDA2626A5E3230220152ECB711B40DDD7164F87B1BDF5EE7955B31C9F223F11E6DE67300DFC5EB90B81141359AA928F4D98FDB3D93E8B690C80D37DED11C38314054FADDC8595E2950FA43F673F65C2009F58C7F1',
+  tx_json:
+   { Account: 'jpmKEm2sUevfpFjS7QHdT8Sx7ZGoEXTJAz',
+     Amount: '100000',
+     Destination: 'jVnqw7H46sjpgNFzYvYWS4TAp13NKQA1D',
+     Fee: '10000',
+     Flags: 0,
+     Sequence: 85,
+     SigningPubKey:
+      '029110C3744FB57BD1F4824F5B989AE75EB6402B4365B501F6EDCA9BE44A675E15',
+     TransactionType: 'Payment',
+     TxnSignature:
+      '3045022100A683042FFA7C9436DC523491709AEB64B1A28A721FA50A1F9E5BDA2626A5E3230220152ECB711B40DDD7164F87B1BDF5EE7955B31C9F223F11E6DE67300DFC5EB90B',
+     hash:
+      '39339DD2A1C8C02632011D07F9D5F45C94EB4BF6545E0E5DE9D38F258221049A' } }
+[ { value: '11040.05', currency: 'SWT', issuer: '', freezed: '15' } ]
+
+// demo offer create transactions
+{ success: true, status_code: '0', marker: '', orders: [] }
+signed blob: 1200072200080000240000005664D45550F7DCA70000000000000000000000000000434E5900000000007478E561645059399B334448F7544F2EF308ED326540000000000F42406840000000000027107321029110C3744FB57BD1F4824F5B989AE75EB6402B4365B501F6EDCA9BE44A675E157446304402204642E5E2A158A1C76075EF600B7C31EC0A3F0D4A7C88D881266C17CA76EEC80102203BD1FA5731F6B76D4CAA6F899DABB1993C84E6835B36F1FDADC0CC8B2205355081141359AA928F4D98FDB3D93E8B690C80D37DED11C3
+{ success: true,
+  status_code: '0',
+  engine_result: 'tesSUCCESS',
+  engine_result_code: 0,
+  engine_result_message:
+   'The transaction was applied. Only final in a validated ledger.',
+  tx_blob:
+   '1200072200080000240000005664D45550F7DCA70000000000000000000000000000434E5900000000007478E561645059399B334448F7544F2EF308ED326540000000000F42406840000000000027107321029110C3744FB57BD1F4824F5B989AE75EB6402B4365B501F6EDCA9BE44A675E157446304402204642E5E2A158A1C76075EF600B7C31EC0A3F0D4A7C88D881266C17CA76EEC80102203BD1FA5731F6B76D4CAA6F899DABB1993C84E6835B36F1FDADC0CC8B2205355081141359AA928F4D98FDB3D93E8B690C80D37DED11C3',
+  tx_json:
+   { Account: 'jpmKEm2sUevfpFjS7QHdT8Sx7ZGoEXTJAz',
+     Fee: '10000',
+     Flags: 524288,
+     Sequence: 86,
+     SigningPubKey:
+      '029110C3744FB57BD1F4824F5B989AE75EB6402B4365B501F6EDCA9BE44A675E15',
+     TakerGets: '1000000',
+     TakerPays:
+      { currency: 'CNY',
+        issuer: 'jBciDE8Q3uJjf111VeiUNM775AMKHEbBLS',
+        value: '0.6' },
+     TransactionType: 'OfferCreate',
+     TxnSignature:
+      '304402204642E5E2A158A1C76075EF600B7C31EC0A3F0D4A7C88D881266C17CA76EEC80102203BD1FA5731F6B76D4CAA6F899DABB1993C84E6835B36F1FDADC0CC8B22053550',
+     hash:
+      '1DFBD2E1B14451CF3EBE529B32E0164E236B4204BBFF1A89C68C2D62737DF48E' } }
+{ type: 'sell',
+  pair: 'SWT/CNY:jBciDE8Q3uJjf111VeiUNM775AMKHEbBLS',
+  amount: '1.000000',
+  price: '0.6',
+  sequence: 86 }
+[ { type: 'sell',
+    pair: 'SWT/CNY:jBciDE8Q3uJjf111VeiUNM775AMKHEbBLS',
+    amount: '1.000000',
+    price: '0.6',
+    sequence: 86 } ]
+
+// demo offer cancel transactions
+{ success: true,
+  status_code: '0',
+  engine_result: 'tesSUCCESS',
+  engine_result_code: 0,
+  engine_result_message:
+   'The transaction was applied. Only final in a validated ledger.',
+  tx_blob:
+   '120008220000000024000000572019000000566840000000000027107321029110C3744FB57BD1F4824F5B989AE75EB6402B4365B501F6EDCA9BE44A675E1574473045022100AE59ADD8B61777A7CFE60FDFBF903E5C2FA93E4711ACF2F99AACCAD10E3B8C9B022014369C4E8776539E73FE55567A22BBABBA776FC6DD028B07252B57E41585A56081141359AA928F4D98FDB3D93E8B690C80D37DED11C3',
+  tx_json:
+   { Account: 'jpmKEm2sUevfpFjS7QHdT8Sx7ZGoEXTJAz',
+     Fee: '10000',
+     Flags: 0,
+     OfferSequence: 86,
+     Sequence: 87,
+     SigningPubKey:
+      '029110C3744FB57BD1F4824F5B989AE75EB6402B4365B501F6EDCA9BE44A675E15',
+     TransactionType: 'OfferCancel',
+     TxnSignature:
+      '3045022100AE59ADD8B61777A7CFE60FDFBF903E5C2FA93E4711ACF2F99AACCAD10E3B8C9B022014369C4E8776539E73FE55567A22BBABBA776FC6DD028B07252B57E41585A560',
+     hash:
+      '92AA97F76175F84CFA34C43DB191D918E167198F36786618F42B7C0A99B4D175' } }
+[]
+
+// demo relation transactions
+{ success: true,
+  status_code: '0',
+  balances:
+   [ { value: '99.973',
+       currency: 'CNY',
+       issuer: 'jBciDE8Q3uJjf111VeiUNM775AMKHEbBLS',
+       freezed: '13.000000' } ],
+  sequence: 88 }
+{ success: true,
+  status_code: '0',
+  balances:
+   [ { value: '99.973',
+       currency: 'CNY',
+       issuer: 'jBciDE8Q3uJjf111VeiUNM775AMKHEbBLS',
+       freezed: '13.000000' } ],
+  sequence: 88 }
+
+```
+
 ### code
 
 ```typescript
