@@ -4,6 +4,7 @@ const Remote = require("../").Remote
 const DATA = require("./config")
 const remote = new Remote({ server: DATA.server })
 
+let payid = "should be updated during payments query"
 let txid = "should be updated during transactions query"
 let ledger_index = 100
 let ledger_hash = "should be updated during ledger query"
@@ -91,6 +92,22 @@ describe("Remote", function() {
       expect(data.success).to.be.true
       expect(data).to.have.property("payments")
       expect(data.payments[0]).to.be.an("object")
+      payid = data.payments[0].hash
+    })
+    it("get account payment with correct hash", async function() {
+      try {
+        let data = await remote.getAccountPayment(DATA.address, payid)
+        expect(data.hash).to.equal(payid)
+      } catch (error) {
+        expect(error).to.equal("should not throw")
+      }
+    })
+    it("get account payment with incorrect hash", async function() {
+      try {
+        await remote.getAccountPayment(DATA.address, "wrongtxhash")
+      } catch (error) {
+        expect(error).to.equal("Invalid parameter: hash.")
+      }
     })
     it("post account payments with correct address but no secret", async function() {
       try {
@@ -227,6 +244,13 @@ describe("Remote", function() {
       expect(data).to.have.property("transaction")
       expect(data.transaction.hash).to.equal(txid)
     })
+    it("getAccountTransaction with incorrect hash", async function() {
+      try {
+        await remote.getAccountTransaction(DATA.address, "wrongtxhash")
+      } catch (error) {
+        expect(error).to.equal("Invalid parameter: hash.")
+      }
+    })
     it("get transaction", async function() {
       let data = await remote.getTransaction(txid)
       expect(data).to.have.property("success")
@@ -302,6 +326,32 @@ describe("Remote", function() {
         console.log(error)
         expect(error).to.equal("should not throw")
       }
+    })
+  })
+  describe("parameters", function() {
+    this.timeout(15000)
+    it("CNY for getAccountBalances", async function() {
+      try {
+        data = await remote.getAccountBalances(DATA.address, {
+          currency: "CNY"
+        })
+        expect(data).to.have.property("success")
+        expect(data.success).to.be.true
+        expect(data).to.have.property("balances")
+        expect(data.balances[0]).to.be.an("object")
+        expect(data.balances[0].currency).to.equal("CNY")
+      } catch (error) {
+        expect(error).to.equal("should not throw")
+      }
+    })
+    it("results_per_page for getAccountTransactions", async function() {
+      let data = await remote.getAccountTransactions(DATA.address, {
+        results_per_page: 2
+      })
+      expect(data).to.have.property("success")
+      expect(data.success).to.be.true
+      expect(data).to.have.property("transactions")
+      expect(data.transactions.length).to.equal(2)
     })
   })
 })

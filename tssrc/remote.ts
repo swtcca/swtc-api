@@ -1,5 +1,5 @@
 import axios from "axios"
-import qs from "qs"
+// import qs from "qs"
 import { Wallet } from "swtc-factory"
 import { Transaction } from "swtc-transaction"
 
@@ -35,55 +35,55 @@ class Remote {
   }
 
   // wrap axios promise to resolve only interested response data instead
-  public getRequest(url: string, params: object = {}) {
-    return new Promise((resolve, reject) => {
-      params
-        ? this._axios
-            .get(
-              `${url}?${qs.stringify(params, {
-                allowDots: true,
-                encode: false
-              })}`
-            )
-            .then((response) => resolve(response.data))
-            .catch((error) => reject(error))
-        : this._axios
-            .get(url)
-            .then((response) => resolve(response.data))
-            .catch((error) => reject(error))
-    })
-  }
-
-  // guard unsafe operation and wrap axios promise to resolve only interested response data instead
-  public postRequest(url: string, data: object = {}, safe = false) {
-    if (!safe) {
-      return Promise.reject("unsafe operation disabled")
-    }
+  public getRequest(url: string, config: object = {}) {
     return new Promise((resolve, reject) => {
       this._axios
-        .post(url, data)
+        .get(url, config)
         .then((response) => resolve(response.data))
         .catch((error) => reject(error))
     })
   }
 
   // guard unsafe operation and wrap axios promise to resolve only interested response data instead
-  public deleteRequest(url: string, data: object = {}, safe = false) {
+  public postRequest(
+    url: string,
+    data: object = {},
+    config: object = {},
+    safe = false
+  ) {
     if (!safe) {
       return Promise.reject("unsafe operation disabled")
     }
     return new Promise((resolve, reject) => {
       this._axios
-        .delete(url, data)
+        .post(url, data, config)
+        .then((response) => resolve(response.data))
+        .catch((error) => reject(error))
+    })
+  }
+
+  // guard unsafe operation and wrap axios promise to resolve only interested response data instead
+  public deleteRequest(
+    url: string,
+    data: object = {},
+    config: object = {},
+    safe = false
+  ) {
+    if (!safe) {
+      return Promise.reject("unsafe operation disabled")
+    }
+    return new Promise((resolve, reject) => {
+      this._axios
+        .delete(url, data, config)
         .then((response) => resolve(response.data))
         .catch((error) => reject(error))
     })
   }
 
   // submit locally signed transactions, this is the only permitted post and delete operation
-  public postBlob(params: object = {}) {
+  public postBlob(data: object = {}) {
     const url = `blob`
-    return this.postRequest(url, params, true)
+    return this.postRequest(url, data, {}, true)
   }
 
   public getLedger(param: string | number = "") {
@@ -110,24 +110,32 @@ class Remote {
       return Promise.reject("invalid address provided")
     }
     const url = `accounts/${address}/balances`
-    return this.getRequest(url, params)
+    return this.getRequest(url, { params })
   }
 
+  public getAccountPayment(address: string, hash: string) {
+    address = address.trim()
+    if (!Wallet.isValidAddress(address)) {
+      return Promise.reject("invalid address provided")
+    }
+    const url = `accounts/${address}/payments/${hash}`
+    return this.getRequest(url)
+  }
   public getAccountPayments(address: string, params: object = {}) {
     address = address.trim()
     if (!Wallet.isValidAddress(address)) {
       return Promise.reject("invalid address provided")
     }
     const url = `accounts/${address}/payments`
-    return this.getRequest(url, params)
+    return this.getRequest(url, { params })
   }
-  public postAccountPayments(address: string, params: object = {}) {
+  public postAccountPayments(address: string, data: object = {}) {
     address = address.trim()
     if (!Wallet.isValidAddress(address)) {
       return Promise.reject("invalid address provided")
     }
     const url = `accounts/${address}/payments`
-    return this.postRequest(url, params)
+    return this.postRequest(url, data)
   }
   public deleteAccountPayments(address: string, data: object = {}) {
     address = address.trim()
@@ -138,13 +146,22 @@ class Remote {
     return this.deleteRequest(url, data)
   }
 
+  public getAccountOrder(address: string, hash: string) {
+    address = address.trim()
+    hash = hash.trim()
+    if (!Wallet.isValidAddress(address)) {
+      return Promise.reject("invalid address provided")
+    }
+    const url = `accounts/${address}/orders/${hash}`
+    return this.getRequest(url)
+  }
   public getAccountOrders(address: string, params: object = {}) {
     address = address.trim()
     if (!Wallet.isValidAddress(address)) {
       return Promise.reject("invalid address provided")
     }
     const url = `accounts/${address}/orders`
-    return this.getRequest(url, params)
+    return this.getRequest(url, { params })
   }
   public postAccountOrders(address: string, data: object = {}) {
     address = address.trim()
@@ -167,19 +184,19 @@ class Remote {
     base = base.trim()
     counter = counter.trim()
     const url = `order_book/${base}/${counter}`
-    return this.getRequest(url, params)
+    return this.getRequest(url, { params })
   }
   public getOrderBooksBids(base: string, counter: string, params: object = {}) {
     base = base.trim()
     counter = counter.trim()
     const url = `order_book/bids/${base}/${counter}`
-    return this.getRequest(url, params)
+    return this.getRequest(url, { params })
   }
   public getOrderBooksAsks(base: string, counter: string, params: object = {}) {
     base = base.trim()
     counter = counter.trim()
     const url = `order_book/asks/${base}/${counter}`
-    return this.getRequest(url, params)
+    return this.getRequest(url, { params })
   }
 
   public getAccountTransactions(address: string, params: object = {}) {
@@ -188,7 +205,7 @@ class Remote {
       return Promise.reject("invalid address provided")
     }
     const url = `/accounts/${address}/transactions`
-    return this.getRequest(url, params)
+    return this.getRequest(url, { params })
   }
   public getAccountTransaction(address: string, id_or_hash: number | string) {
     address = address.trim()
@@ -222,7 +239,7 @@ class Remote {
     return this.postRequest(url, data)
   }
 
-  // here we extend beyond api calls to interfact with swtc-transactions
+  // here we extend beyond api calls to interact with swtc-transactions
   // we try to use the same as that has been in swtc-lib
   public buildPaymentTx(options) {
     return Transaction.buildPaymentTx(options, this)
@@ -233,11 +250,11 @@ class Remote {
   public buildOfferCancelTx(options) {
     return Transaction.buildOfferCancelTx(options, this)
   }
-  public buildAccountSetTx(options) {
-    return Transaction.buildAccountSetTx(options, this)
-  }
   public buildRelationTx(options) {
     return Transaction.buildRelationTx(options, this)
+  }
+  public buildAccountSetTx(options) {
+    return Transaction.buildAccountSetTx(options, this)
   }
   public buildContractDeployTx(options) {
     return Transaction.deployContractTx(options, this)
