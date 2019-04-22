@@ -8,11 +8,12 @@
 2. masked unsafe operations (never send out **secret**)
 3. work together with **swtc-transaction** for **local sign**
 4. promise based **axios** operation
-5. **typescript** friend
-
-- subscription not added yet
+5. **typescript** friendly
+   ![vsc](https://raw.githubusercontent.com/swtcca/swtc-api/master/images/omni-vsc.png)
 
 ## usages
+
+![vim](https://raw.githubusercontent.com/swtcca/swtc-api/master/images/omni-vim.png)
 
 ### import
 
