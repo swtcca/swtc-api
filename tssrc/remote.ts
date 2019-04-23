@@ -4,9 +4,9 @@ import { Wallet } from "swtc-factory"
 import { Transaction } from "swtc-transaction"
 
 class Remote {
-  public _server: string
-  public _token: string
-  public _axios: any
+  private _server: string
+  private _token: string
+  private _axios: any
   constructor(options: any = {}) {
     this._server = options.server || "https://api.jingtum.com"
     this._token = options.token || "SWT"
@@ -29,8 +29,15 @@ class Remote {
     )
   }
 
-  // show instacnce basic configuration
-  public display() {
+  // show instance basic configuration
+  public config(options: any = {}) {
+    if ("server" in options) {
+      this._server = options.server
+      this._axios = axios.create({ baseURL: this._server + "/v2/" })
+    }
+    if ("token" in options) {
+      this._token = options.token
+    }
     return { server: this._server, token: this._token }
   }
 
