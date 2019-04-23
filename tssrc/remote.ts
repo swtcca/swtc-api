@@ -1,7 +1,9 @@
 import axios from "axios"
-// import qs from "qs"
 import { Wallet } from "swtc-factory"
+import { Serializer } from "swtc-serializer"
 import { Transaction } from "swtc-transaction"
+import * as utils from "swtc-utils"
+import * as utf8 from "utf8"
 
 class Remote {
   private _server: string
@@ -277,6 +279,100 @@ class Remote {
   }
   public buildBrokerageTx(options) {
     return Transaction.callContractTx(options, this)
+  }
+  public txSetSecret(tx, secret: string) {
+    tx.setSecret(secret)
+    return tx
+  }
+  public txSetSequence(tx, sequence: number) {
+    tx.setSequence(sequence)
+    return tx
+  }
+  public txSign(tx): Promise<any> {
+    return new Promise((resolve, reject) => {
+      if (!tx.tx_json) {
+        reject("a transaction argument is expected")
+      } else if ("blob" in tx.tx_json) {
+        resolve(tx)
+      } else {
+        if (!tx._secret) {
+          reject("a valid secret is needed to sign with")
+        }
+        if (!tx.tx_json.Sequence) {
+          this._txSetSequence(tx)
+            .then((tx2) => {
+              this._txSign(tx2)
+                .then((tx3) => resolve(tx3))
+                .catch((error) => reject(error))
+            })
+            .catch((error) => reject(error))
+        } else {
+          this._txSign(tx)
+            .then((tx2) => resolve(tx2))
+            .catch((error) => reject(error))
+        }
+      }
+    })
+  }
+
+  // private and protected methods
+  private _txSign(tx): Promise<any> {
+    tx.tx_json.Fee = tx.tx_json.Fee / 1000000
+    // payment
+    if (
+      tx.tx_json.Amount &&
+      JSON.stringify(tx.tx_json.Amount).indexOf("{") < 0
+    ) {
+      // 基础货币
+      tx.tx_json.Amount = Number(tx.tx_json.Amount) / 1000000
+    }
+    if (tx.tx_json.Memos) {
+      const memos = tx.tx_json.Memos
+      for (const memo of memos) {
+        memo.Memo.MemoData = utf8.decode(utils.hexToString(memo.Memo.MemoData))
+      }
+    }
+    if (tx.tx_json.SendMax && typeof tx.tx_json.SendMax === "string") {
+      tx.tx_json.SendMax = Number(tx.tx_json.SendMax) / 1000000
+    }
+    // order
+    if (
+      tx.tx_json.TakerPays &&
+      JSON.stringify(tx.tx_json.TakerPays).indexOf("{") < 0
+    ) {
+      // 基础货币
+      tx.tx_json.TakerPays = Number(tx.tx_json.TakerPays) / 1000000
+    }
+    if (
+      tx.tx_json.TakerGets &&
+      JSON.stringify(tx.tx_json.TakerGets).indexOf("{") < 0
+    ) {
+      // 基础货币
+      tx.tx_json.TakerGets = Number(tx.tx_json.TakerGets) / 1000000
+    }
+    return new Promise((resolve, reject) => {
+      try {
+        const wt = new Wallet(tx._secret, this._token)
+        tx.tx_json.SigningPubKey = wt.getPublicKey()
+        const prefix = 0x53545800
+        const hash = Serializer.from_json(tx.tx_json).hash(prefix)
+        tx.tx_json.TxnSignature = wt.signTx(hash)
+        tx.tx_json.blob = Serializer.from_json(tx.tx_json).to_hex()
+        resolve(tx)
+      } catch (error) {
+        reject(error)
+      }
+    })
+  }
+  private _txSetSequence(tx): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.getAccountBalances(tx.tx_json.Account)
+        .then((data: any) => {
+          this.txSetSequence(tx, data.sequence)
+          resolve(tx)
+        })
+        .catch((error) => reject(error))
+    })
   }
 }
 
