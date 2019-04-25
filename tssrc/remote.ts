@@ -14,7 +14,7 @@ class Remote {
     this._token = options.token || "SWT"
     this._axios = axios.create({ baseURL: this._server + "/v2/" })
     this._axios.interceptors.response.use(
-      (response) => {
+      response => {
         // Do something with response data
         if (response.data.success === false) {
           // console.log(response.data)
@@ -24,7 +24,7 @@ class Remote {
         }
         return response
       },
-      (error) => {
+      error => {
         // Do something with response error
         return Promise.reject(error)
       }
@@ -48,8 +48,8 @@ class Remote {
     return new Promise((resolve, reject) => {
       this._axios
         .get(url, config)
-        .then((response) => resolve(response.data))
-        .catch((error) => reject(error))
+        .then(response => resolve(response.data))
+        .catch(error => reject(error))
     })
   }
 
@@ -66,8 +66,8 @@ class Remote {
     return new Promise((resolve, reject) => {
       this._axios
         .post(url, data, config)
-        .then((response) => resolve(response.data))
-        .catch((error) => reject(error))
+        .then(response => resolve(response.data))
+        .catch(error => reject(error))
     })
   }
 
@@ -84,8 +84,8 @@ class Remote {
     return new Promise((resolve, reject) => {
       this._axios
         .delete(url, data, config)
-        .then((response) => resolve(response.data))
-        .catch((error) => reject(error))
+        .then(response => resolve(response.data))
+        .catch(error => reject(error))
     })
   }
 
@@ -288,35 +288,62 @@ class Remote {
     tx.setSequence(sequence)
     return tx
   }
-  public txSign(tx): Promise<any> {
-    return new Promise((resolve, reject) => {
-      if (!tx.tx_json) {
-        reject("a transaction argument is expected")
-      } else if ("blob" in tx.tx_json) {
-        resolve(tx)
-      } else {
-        if (!tx._secret) {
-          reject("a valid secret is needed to sign with")
-        }
-        if (!tx.tx_json.Sequence) {
-          this._txSetSequence(tx)
-            .then((tx2) => {
-              this._txSign(tx2)
-                .then((tx3) => resolve(tx3))
-                .catch((error) => reject(error))
-            })
-            .catch((error) => reject(error))
-        } else {
-          this._txSign(tx)
-            .then((tx2) => resolve(tx2))
-            .catch((error) => reject(error))
+  public async txSignPromise(tx, secret = "", sequence = 0): Promise<any> {
+    if (!tx.tx_json) {
+      return Promise.reject("a transaction argument is expected")
+    } else if ("blob" in tx.tx_json) {
+      return Promise.resolve(tx)
+    } else {
+      for (const key in tx.tx_json) {
+        if (tx.tx_json[key] instanceof Error) {
+          return Promise.reject(tx.tx_json[key].message)
         }
       }
-    })
+      if (!tx._secret) {
+        if (!secret) {
+          return Promise.reject("a valid secret is needed to sign with")
+        } else {
+          tx._secret = secret
+        }
+      }
+      if (!tx.tx_json.Sequence) {
+        try {
+          if (sequence) {
+            this.txSetSequence(tx, sequence)
+          } else {
+            await this._txSetSequencePromise(tx)
+          }
+          await this._txSignPromise(tx)
+          return Promise.resolve(tx)
+        } catch {
+          error => Promise.reject(error)
+        }
+      } else {
+        try {
+          tx = await this._txSignPromise(tx)
+          return Promise.resolve(tx)
+        } catch {
+          error => Promise.reject(error)
+        }
+      }
+    }
+  }
+  public async txSubmitPromise(tx, secret = "", sequence = 0): Promise<any> {
+    try {
+      tx = await this.txSignPromise(tx, secret, sequence)
+      for (const key in tx.tx_json) {
+        if (tx.tx_json[key] instanceof Error) {
+          return Promise.reject(tx.tx_json[key].message)
+        }
+      }
+      return this.postBlob({ blob: tx.tx_json.blob })
+    } catch {
+      error => Promise.reject(error)
+    }
   }
 
   // private and protected methods
-  private _txSign(tx): Promise<any> {
+  private async _txSignPromise(tx): Promise<any> {
     tx.tx_json.Fee = tx.tx_json.Fee / 1000000
     // payment
     if (
@@ -364,14 +391,14 @@ class Remote {
       }
     })
   }
-  private _txSetSequence(tx): Promise<any> {
+  private _txSetSequencePromise(tx): Promise<any> {
     return new Promise((resolve, reject) => {
       this.getAccountBalances(tx.tx_json.Account)
         .then((data: any) => {
           this.txSetSequence(tx, data.sequence)
           resolve(tx)
         })
-        .catch((error) => reject(error))
+        .catch(error => reject(error))
     })
   }
 }
