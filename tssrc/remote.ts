@@ -315,15 +315,15 @@ class Remote {
           }
           await this._txSignPromise(tx)
           return Promise.resolve(tx)
-        } catch {
-          error => Promise.reject(error)
+        } catch (error) {
+          return Promise.reject(error)
         }
       } else {
         try {
           tx = await this._txSignPromise(tx)
           return Promise.resolve(tx)
-        } catch {
-          error => Promise.reject(error)
+        } catch (error) {
+          return Promise.reject(error)
         }
       }
     }
@@ -337,8 +337,8 @@ class Remote {
         }
       }
       return this.postBlob({ blob: tx.tx_json.blob })
-    } catch {
-      error => Promise.reject(error)
+    } catch (error) {
+      return Promise.reject(error)
     }
   }
 

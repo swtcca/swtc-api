@@ -107,6 +107,54 @@ describe("Remote", function() {
         expect(error).to.equal("should not throw")
       }
     })
+    it("remote.txSubmitPromise() with secret and sequence", async function() {
+      let tx = remote.buildPaymentTx({
+        source: DATA.address,
+        to: DATA.address2,
+        amount: {
+          value: 1,
+          currency: "SWT",
+          issuer: ""
+        }
+      })
+      try {
+        const result = await remote.txSubmitPromise(tx, DATA.secret, 10)
+        expect(tx.tx_json).to.have.property("Sequence")
+        expect(tx.tx_json.Sequence).to.be.a("number")
+        expect(tx.tx_json).to.have.property("blob")
+        expect(result).to.have.property("success")
+        expect(result.success).to.be.true
+        expect(result).to.have.property("engine_result")
+        expect(result.engine_result).to.be.equal("tefPAST_SEQ")
+        expect(result).to.have.property("tx_blob")
+        expect(result.tx_blob).to.be.equal(tx.tx_json.blob)
+      } catch (error) {
+        expect(error).to.equal("should not throw")
+      }
+    })
+    it("remote.txSubmitPromise() with secret", async function() {
+      let tx = remote.buildPaymentTx({
+        source: DATA.address,
+        to: DATA.address2,
+        amount: {
+          value: 1,
+          currency: "SWT",
+          issuer: ""
+        }
+      })
+      try {
+        const result = await remote.txSubmitPromise(tx, DATA.secret)
+        expect(tx.tx_json).to.have.property("Sequence")
+        expect(tx.tx_json.Sequence).to.be.a("number")
+        expect(tx.tx_json).to.have.property("blob")
+        expect(result).to.have.property("success")
+        expect(result.success).to.be.true
+        expect(result).to.have.property("tx_blob")
+        expect(result.tx_blob).to.be.equal(tx.tx_json.blob)
+      } catch (error) {
+        expect(error).to.equal("should not throw")
+      }
+    })
     it("remote.txSubmitPromise() with txSetSecret", async function() {
       let tx = remote.buildPaymentTx({
         source: DATA.address,
