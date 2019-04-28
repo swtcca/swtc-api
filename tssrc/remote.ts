@@ -280,6 +280,10 @@ class Remote {
   public buildBrokerageTx(options) {
     return Transaction.callContractTx(options, this)
   }
+  public txAddMemo(tx, memo: string) {
+    tx.addMemo(memo)
+    return tx
+  }
   public txSetSecret(tx, secret: string) {
     tx.setSecret(secret)
     return tx
@@ -288,7 +292,12 @@ class Remote {
     tx.setSequence(sequence)
     return tx
   }
-  public async txSignPromise(tx, secret = "", sequence = 0): Promise<any> {
+  public async txSignPromise(
+    tx,
+    secret = "",
+    memo = "",
+    sequence = 0
+  ): Promise<any> {
     if (!tx.tx_json) {
       return Promise.reject("a transaction argument is expected")
     } else if ("blob" in tx.tx_json) {
@@ -299,6 +308,16 @@ class Remote {
           return Promise.reject(tx.tx_json[key].message)
         }
       }
+      try {
+        if (memo) {
+          this.txAddMemo(tx, memo)
+        }
+        if (sequence) {
+          this.txSetSequence(tx, sequence)
+        }
+      } catch (error) {
+        return Promise.reject(error)
+      }
       if (!tx._secret) {
         if (!secret) {
           return Promise.reject("a valid secret is needed to sign with")
@@ -308,11 +327,7 @@ class Remote {
       }
       if (!tx.tx_json.Sequence) {
         try {
-          if (sequence) {
-            this.txSetSequence(tx, sequence)
-          } else {
-            await this._txSetSequencePromise(tx)
-          }
+          await this._txSetSequencePromise(tx)
           await this._txSignPromise(tx)
           return Promise.resolve(tx)
         } catch (error) {
@@ -328,9 +343,14 @@ class Remote {
       }
     }
   }
-  public async txSubmitPromise(tx, secret = "", sequence = 0): Promise<any> {
+  public async txSubmitPromise(
+    tx,
+    secret = "",
+    memo = "",
+    sequence = 0
+  ): Promise<any> {
     try {
-      tx = await this.txSignPromise(tx, secret, sequence)
+      tx = await this.txSignPromise(tx, secret, memo, sequence)
       for (const key in tx.tx_json) {
         if (tx.tx_json[key] instanceof Error) {
           return Promise.reject(tx.tx_json[key].message)
