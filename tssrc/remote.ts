@@ -1,8 +1,8 @@
 import axios from "axios"
-import { Wallet } from "swtc-factory"
+import { Wallet } from "swtc-wallet"
 import { Serializer } from "swtc-serializer"
 import { Transaction } from "swtc-transaction"
-import * as utils from "swtc-utils"
+import { utils } from "swtc-utils"
 import * as utf8 from "utf8"
 
 class Remote {
@@ -399,7 +399,7 @@ class Remote {
     }
     return new Promise((resolve, reject) => {
       try {
-        const wt = new Wallet(tx._secret, this._token)
+        const wt = new Wallet(tx._secret)
         tx.tx_json.SigningPubKey = wt.getPublicKey()
         const prefix = 0x53545800
         const hash = Serializer.from_json(tx.tx_json).hash(prefix)
