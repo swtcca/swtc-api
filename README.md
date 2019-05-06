@@ -49,7 +49,7 @@ async function main() {
     tx = remote.buildPaymentTx({
       source: DATA.address,
       to: DATA.address2,
-      amount: { value: 0.1, currency: "SWT", issuer: "" }
+      amount: remote.makeAmount(0.1) 
     })
     tx.setSequence(sequence)
     tx.setSecret(DATA.secret)
@@ -72,8 +72,8 @@ async function main() {
     tx = remote.buildOfferCreateTx({
       type: "Sell",
       account: DATA.address,
-      taker_gets: { value: 1, currency: "SWT", issuer: "" },
-      taker_pays: { value: 0.6, currency: "CNY", issuer: DATA.issuer }
+      taker_gets: remote.makeAmount(1),
+      taker_pays: remote.makeAmount(0.01, 'cny', DATA.issuer }
     })
     tx.setSecret(DATA.secret)
     tx.sign((error, blob) => {

@@ -8,10 +8,12 @@ import * as utf8 from "utf8"
 class Remote {
   private _server: string
   private _token: string
+  private _issuer: string
   private _axios: any
   constructor(options: any = {}) {
     this._server = options.server || "https://api.jingtum.com"
     this._token = options.token || "SWT"
+    this._issuer = options.issuer || "jGa9J9TkqtBcUoHe2zqhVFFbgUVED6o9or"
     this._axios = axios.create({ baseURL: this._server + "/v2/" })
     this._axios.interceptors.response.use(
       response => {
@@ -40,7 +42,10 @@ class Remote {
     if ("token" in options) {
       this._token = options.token
     }
-    return { server: this._server, token: this._token }
+    if ("issuer" in options) {
+      this._issuer = options.issuer
+    }
+    return { server: this._server, token: this._token, issuer: this._issuer }
   }
 
   // wrap axios promise to resolve only interested response data instead
@@ -280,6 +285,14 @@ class Remote {
   public buildBrokerageTx(options) {
     return Transaction.callContractTx(options, this)
   }
+  // makeCurrency and makeAmount
+  public makeCurrency(currency = this._token, issuer = this._issuer) {
+    return Wallet.makeCurrency(currency, issuer)
+  }
+  public makeAmount(value = 1, currency = this._token, issuer = this._issuer) {
+    return Wallet.makeAmount(value, currency, issuer)
+  }
+  // transaction funcs
   public txAddMemo(tx, memo: string) {
     tx.addMemo(memo)
     return tx
