@@ -11,8 +11,14 @@ let ledger_hash = "should be updated during ledger query"
 
 describe("Remote", function() {
   describe("constructor", function() {
-    it("instantiate a Remote successfully", function() {
+    it("instantiate a default Remote successfully", function() {
       let remote = new Remote({})
+      expect(remote._server).to.be.equal("https://api.jingtum.com")
+      expect(remote._token).to.be.equal("SWT")
+    })
+    it("instantiate a testnet Remote successfully", function() {
+      let remote = new Remote({ server: "https://tapi.jingtum.com" })
+      expect(remote._server).to.be.equal("https://tapi.jingtum.com")
       expect(remote._token).to.be.equal("SWT")
     })
   })

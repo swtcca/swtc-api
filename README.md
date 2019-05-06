@@ -2,6 +2,10 @@
 
 ## [Offical Doc 官方](http://developer.jingtum.com/api2_doc.html)
 
+## changelog
+
+- added .txSignPromise() and .txSubmitPromise()
+
 ## Compare with swtc-lib
 
 1. use rest **api** instead of web socket
@@ -30,7 +34,7 @@ import { Remote } from "swtc-api"
 import DATA from "./config"
 import { Remote } from "swtc-api"
 const remote = new Remote({ server: DATA.server })
-const sleep = (time) => new Promise((res) => setTimeout(() => res(), time))
+const sleep = time => new Promise(res => setTimeout(() => res(), time))
 
 async function main() {
   let tx: any, result: any, sequence: number
@@ -298,7 +302,7 @@ async function main() {
   try {
     console.log(`// query balances and demo param`)
     let result: any = await remote.getAccountBalances(DATA.address)
-    result.balances.forEach((balance) =>
+    result.balances.forEach(balance =>
       console.log(`${balance.value.padEnd(16)}${balance.currency}`)
     )
     result = await remote.getAccountBalances(DATA.address, { currency: "CNY" })
@@ -314,7 +318,7 @@ async function main() {
       if ("marker" in result) {
         console.log(result.marker)
       }
-      result.transactions.forEach((tx) => console.log(tx.hash))
+      result.transactions.forEach(tx => console.log(tx.hash))
     }
     console.log(result)
     console.log(`\n// query payments history`)
