@@ -23,10 +23,8 @@ describe("remote methods", function() {
       expect(remote.makeCurrency("vcc", DATA.issuer).currency).to.be.equal(
         "VCC"
       )
-      remote.config({issuer: DATA.issuer})
-      expect(remote.makeCurrency("VCC").issuer).to.be.equal(
-        DATA.issuer
-      )
+      remote.config({ issuer: DATA.issuer })
+      expect(remote.makeCurrency("VCC").issuer).to.be.equal(DATA.issuer)
     })
   })
   describe("test makeAmount", function() {
@@ -46,9 +44,7 @@ describe("remote methods", function() {
         "VCC"
       )
       let remote2 = new Remote({ server: DATA.server, issuer: DATA.issuer })
-      expect(remote2.makeAmount(2, "VCC").issuer).to.be.equal(
-        DATA.issuer
-      )
+      expect(remote2.makeAmount(2, "VCC").issuer).to.be.equal(DATA.issuer)
     })
   })
 })

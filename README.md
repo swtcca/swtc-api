@@ -49,7 +49,7 @@ async function main() {
     tx = remote.buildPaymentTx({
       source: DATA.address,
       to: DATA.address2,
-      amount: remote.makeAmount(0.1) 
+      amount: remote.makeAmount(0.1)
     })
     tx.setSequence(sequence)
     tx.setSecret(DATA.secret)

@@ -1,6 +1,6 @@
 {
   "name": "swtc-api",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "swtc lib api",
   "main": "src/index.js",
   "directories": {
@@ -51,8 +51,10 @@
     "nyc": "^14.0.0",
     "prettier": "^1.16.4",
     "pretty-quick": "^1.10.0",
+    "swtc-tum3": "^0.1.2",
     "ts-node": "^8.1.0",
     "tslint": "^5.15.0",
+    "tum3-eth-abi": "^1.0.2",
     "typescript": "^3.4.1"
   },
   "babel": {

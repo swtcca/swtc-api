@@ -6,15 +6,38 @@ import { utils } from "swtc-utils"
 import * as utf8 from "utf8"
 
 class Remote {
+  public static Wallet = Wallet
+  public static Transaction = Transaction
+  public static utils = utils
+  public readonly AbiCoder: any = null
+  public readonly Tum3: any = null
   private _server: string
   private _token: string
   private _issuer: string
   private _axios: any
+  private _solidity: boolean = false
   constructor(options: any = {}) {
-    this._server = options.server || "https://api.jingtum.com"
-    this._token = options.token || "SWT"
-    this._issuer = options.issuer || "jGa9J9TkqtBcUoHe2zqhVFFbgUVED6o9or"
-    this._axios = axios.create({ baseURL: this._server + "/v2/" })
+    this._server =
+      options.server || Wallet.config.apiserver || "https://api.jingtum.com"
+    this._token = options.token || Wallet.token || "SWT"
+    this._solidity = options._solidity ? true : false
+    if (this._solidity) {
+      try {
+        this.AbiCoder = require("tum3-eth-abi").AbiCoder
+        this.Tum3 = require("swtc-tum3")
+      } catch (error) {
+        throw Error(
+          "install tum3-eth-abi and swtc-tum3 to enable solidity support"
+        )
+      }
+    }
+    this._issuer =
+      options.issuer ||
+      Wallet.config.issuer ||
+      "jGa9J9TkqtBcUoHe2zqhVFFbgUVED6o9or"
+    this._axios = axios.create({
+      baseURL: this._server.replace(/\/$/, "") + "/v2/"
+    })
     this._axios.interceptors.response.use(
       response => {
         // Do something with response data
@@ -45,7 +68,12 @@ class Remote {
     if ("issuer" in options) {
       this._issuer = options.issuer
     }
-    return { server: this._server, token: this._token, issuer: this._issuer }
+    return {
+      server: this._server,
+      token: this._token,
+      solidity: this._solidity,
+      issuer: this._issuer
+    }
   }
 
   // wrap axios promise to resolve only interested response data instead
